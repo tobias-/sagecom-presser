@@ -53,6 +53,10 @@ Noise/reset protection:
   - cooldown between pulses
   - fail-safe default OFF on boot/restart
 
+Baseline ESPHome config:
+- `esphome/sagemcom_presser.yaml`
+- Includes ESP32-CAM stream setup and MOSFET-based solenoid pulse control with arming + cooldown gating.
+
 ## Open Electrical Unknowns (Must Measure)
 - Coil resistance
 - Allowed duty cycle / max on-time
