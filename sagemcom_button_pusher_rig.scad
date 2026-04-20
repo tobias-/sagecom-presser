@@ -1,9 +1,9 @@
 /*
   Sagemcom button pusher rig (merged, single-file edition)
 
-  This file merges:
-  - sagemcom_meter_clamp.scad
-  - solenoid_only.scad
+  Single-source model for:
+  - meter/frame reference
+  - solenoid reference + cradle
   - combined placement logic
 
   Coordinate directions (frame reference):
@@ -640,23 +640,24 @@ module combined_printable() {
 // Render selector
 // ---------------------------------------------------------------------------
 
-if (rig_part_to_render == "combined_preview")
+if (rig_part_to_render == "combined_preview") {
     combined_preview();
-else if (rig_part_to_render == "combined_printable")
+} else if (rig_part_to_render == "combined_printable") {
     combined_printable();
-else if (rig_part_to_render == "frame_only")
+} else if (rig_part_to_render == "frame_only") {
     if (frame_show)
         color([0.95, 0.7, 0.1, 0.78])
             button_frame_base();
-else if (rig_part_to_render == "cradle_only")
+} else if (rig_part_to_render == "cradle_only") {
     if (cradle_show)
         placed_solenoid_cradle();
-else if (rig_part_to_render == "solenoid_only")
+} else if (rig_part_to_render == "solenoid_only") {
     if (solenoid_ref_show)
         placed_solenoid_reference();
-else if (rig_part_to_render == "meter_preview")
+} else if (rig_part_to_render == "meter_preview") {
     meter_preview();
-else if (rig_part_to_render == "solenoid_preview")
+} else if (rig_part_to_render == "solenoid_preview") {
     solenoid_preview();
-else if (rig_part_to_render == "collision_check")
+} else if (rig_part_to_render == "collision_check") {
     cradle_collision_check();
+}

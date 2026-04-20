@@ -1,0 +1,16 @@
+# OpenSCAD/generated outputs
+*.stl
+
+# Local regression workspace
+.scad-regression/
+
+# Local Codex/runtime artifacts
+.codex
+
+# Local JS tooling residue
+node_modules/
+package.json
+package-lock.json
+
+# Local photo reference
+20260419_135704 (1).jpg
