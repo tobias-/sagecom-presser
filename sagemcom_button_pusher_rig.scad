@@ -135,6 +135,8 @@ cradle_opening_margin = 0.6;
 cradle_rail_y_trim = 1.0;
 cradle_front_plate_t = 2.0;
 cradle_plunger_hole_extra_d = 2.0;
+cradle_front_wire_notch_w = 4.0;
+cradle_front_wire_notch_depth = 2.0;
 cradle_rear_stop_t = 1.2;
 cradle_rear_stop_gap = 0.2;
 cradle_rear_stop_hole_extra_d = 1.5;
@@ -497,6 +499,8 @@ module solenoid_cradle_u() {
     y_max = -inner_y / 2 + side_y;
     plate_y = y_max - y_min;
     plate_y_center = (y_min + y_max) / 2;
+    front_notch_depth = min(cradle_front_wire_notch_depth, plate_y - 0.2);
+    front_notch_y_center = y_max - front_notch_depth / 2;
     plunger_hole_d = solenoid_ref_front_piston_d + cradle_plunger_hole_extra_d;
     rear_stop_hole_d = solenoid_ref_rear_spring_d + cradle_rear_stop_hole_extra_d;
 
@@ -522,6 +526,10 @@ module solenoid_cradle_u() {
 
                 translate([0, 0, z_min - cradle_front_plate_t / 2])
                     cylinder(h = cradle_front_plate_t + 0.4, d = plunger_hole_d, center = true);
+
+                // Small front-edge notch for routing the two solenoid wires.
+                translate([0, front_notch_y_center, z_min - cradle_front_plate_t / 2])
+                    cube([cradle_front_wire_notch_w, front_notch_depth + 0.2, cradle_front_plate_t + 0.4], center = true);
             }
 
             if (cradle_rear_stop_t > 0.01) {
