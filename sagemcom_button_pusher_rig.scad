@@ -24,7 +24,6 @@ show_frame = true;
 show_solenoid_cradle = true;
 show_centerlines = true;
 show_solenoid_reference = true;
-show_button_target_marker = true;
 
 // Bridge that joins frame and cradle into one printable part.
 bridge_enable = true;
@@ -170,20 +169,6 @@ module frame_to_cradle_bridge() {
     }
 }
 
-module button_target_marker() {
-    // Shows button center and predicted plunger rest/extended tip path.
-    color([0.15, 0.35, 0.95, 0.9])
-        translate([button_x_local, button_y_world, housing_ref_top_z_local + 0.06])
-            cylinder(h = 0.9, d = 3.0, center = false);
-
-    // Tip path guide in Z.
-    tip_rest_z = solenoid_mount_pos[2] - solenoid_front_rest_local;
-    tip_ext_z = solenoid_mount_pos[2] - solenoid_front_extended_local;
-    color([0.95, 0.15, 0.15, 0.75])
-        translate([button_x_local, button_y_world, tip_ext_z])
-            cylinder(h = max(0.2, tip_rest_z - tip_ext_z), d = 1.0, center = false);
-}
-
 module combined_preview() {
     meter_scene();
     if (show_solenoid_cradle)
@@ -194,9 +179,6 @@ module combined_preview() {
 
     if (show_solenoid_reference)
         placed_solenoid_reference();
-
-    if (show_button_target_marker)
-        button_target_marker();
 }
 
 module combined_printable() {

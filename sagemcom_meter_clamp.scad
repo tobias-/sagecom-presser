@@ -67,6 +67,7 @@ frame_wall = 6;
 frame_to_display_gap = 3;
 bottom_edge_margin = 2;
 frame_extend_down = 2.0;      // extend frame downward (-Y) by this amount
+frame_width_trim_each_side = 0.5; // shrink frame/lip fit inward on each X side
 button_relief_d = 18;
 centerline_w = 0.8;
 housing_ref_t = frame_t * 0.5;
@@ -94,16 +95,16 @@ locator_housing_keepout_xy = 0.1;    // XY keepout expansion around housing outl
 
 // Housing-reference bottom tab (visual alignment feature).
 housing_ref_tab_enable = true;
-housing_ref_tab_w = 4.0;             // X width
-housing_ref_tab_y = 1.5;             // Y depth
-housing_ref_tab_z = 1.5;             // Z height above housing front
+housing_ref_tab_w = 5.0;             // X width
+housing_ref_tab_y = 2.5;             // Y depth
+housing_ref_tab_z = 4.0;             // Z height above housing front
 housing_ref_tab_from_bottom = 3.0;   // tab center offset from housing bottom edge
 frame_tab_cutout_enable = true;
 frame_tab_cutout_clearance_xy = 0.25;
-frame_tab_cutout_z = 1.7;            // pocket depth into frame from housing-facing side
+frame_tab_cutout_z = housing_ref_tab_z + 0.3; // pocket depth into frame with small Z clearance
 
 // Optional ledges to mark button center from bottom and right edges.
-button_center_ledges_enable = true;
+button_center_ledges_enable = false;
 button_center_ledge_w = 0.9;         // thin ledge width (XY)
 button_center_ledge_h = 0.8;         // ledge height above frame top (Z)
 
@@ -135,9 +136,10 @@ side_upright_top_y = min(
 // Keep forks at max length, and place the crossbar flush with fork tips.
 crossbar_top_y = side_upright_top_y;
 frame_mid_y = (frame_bottom_y + crossbar_top_y) / 2;
+frame_housing_w = housing_w - 2 * frame_width_trim_each_side;
 display_bezel_half_w = (display_w + 2 * display_bezel_margin) / 2;
 side_upright_x_abs = min(
-    housing_w / 2 - side_upright_w / 2 - 0.2,
+    frame_housing_w / 2 - side_upright_w / 2 - 0.2,
     display_bezel_half_w + side_upright_display_clearance + side_upright_w / 2
 );
 housing_ref_top_z = housing_ref_touch_overlap;
@@ -217,12 +219,12 @@ module frame_centerlines() {
 
 module housing_outline_2d() {
     offset(r = housing_corner_r)
-        square([housing_w - 2 * housing_corner_r, housing_h - 2 * housing_corner_r], center = true);
+        square([frame_housing_w - 2 * housing_corner_r, housing_h - 2 * housing_corner_r], center = true);
 }
 
 module lower_band_mask_2d() {
     translate([0, (frame_bottom_y + crossbar_top_y) / 2])
-        square([housing_w + 8, crossbar_top_y - frame_bottom_y], center = true);
+        square([frame_housing_w + 8, crossbar_top_y - frame_bottom_y], center = true);
 }
 
 module side_upright_mask_2d() {
@@ -254,10 +256,10 @@ module locator_outline_region_2d() {
     side_span_h = y_top_target - frame_bottom_y;
     side_span_yc = (frame_bottom_y + y_top_target) / 2;
     side_span_w = side_upright_w + 2 * locator_outline_region_expand;
-    bottom_span_w = housing_w + 8 + 2 * locator_outline_region_expand;
+    bottom_span_w = frame_housing_w + 8 + 2 * locator_outline_region_expand;
     bottom_span_h = crossbar_top_y - frame_bottom_y;
     y_clip_h = y_top_target - frame_bottom_y;
-    y_clip_w = housing_w + 2 * (locator_outline_clearance + locator_outline_wall + locator_outline_region_expand + 6);
+    y_clip_w = frame_housing_w + 2 * (locator_outline_clearance + locator_outline_wall + locator_outline_region_expand + 6);
 
     intersection() {
         // Housing edge ring with overlap to guarantee union with frame.
@@ -277,7 +279,7 @@ module locator_outline_region_2d() {
 
                 // Side zones (along left/right uprights).
                 for (sx = [-1, 1]) {
-                    translate([sx * (housing_w / 2 - side_upright_w / 2), side_span_yc])
+                    translate([sx * (frame_housing_w / 2 - side_upright_w / 2), side_span_yc])
                         square([side_span_w, side_span_h], center = true);
                 }
             }

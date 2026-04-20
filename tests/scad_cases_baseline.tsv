@@ -1,0 +1,4 @@
+# label	scad_file	part_to_render	defs(semicolon-separated -D entries)
+frame_base	sagemcom_meter_clamp.scad	button_frame_base	-
+solenoid_cradle	solenoid_only.scad	cradle	show_solenoid_in_assembly=false
+combined_printable	sagemcom_button_pusher_rig.scad	combined_printable	show_housing_reference=false;show_centerlines=false;show_solenoid_reference=false
