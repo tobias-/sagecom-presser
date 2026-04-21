@@ -57,6 +57,27 @@ Baseline ESPHome config:
 - `esphome/sagemcom_presser.yaml`
 - Includes ESP32-CAM stream setup and MOSFET-based solenoid pulse control with arming + cooldown gating.
 
+## Action Plan So Far
+Goal: automatically wake the meter display, detect a reading, and report water consumption in cubic meters.
+
+Planned loop:
+1. Every `10s`, check whether the meter display appears to be on.
+2. One candidate detection method is to look for visible lit 7-segment digits in the camera image.
+3. If light conditions are poor, turn on the ESP32-CAM onboard flash LED before the display check/read attempt.
+4. If the display is not on, or the image is too uncertain to trust, trigger the solenoid to press the meter button.
+5. Wait `10s` after a button press before checking again.
+6. If a numeric reading is visible, report the raw displayed value as water consumption in cubic meters.
+7. Publish the reading to Home Assistant and also log it locally.
+8. If two consecutive wake/read attempts fail, expose an error state.
+9. Turn the flash LED back off immediately after the image capture used for the check/read attempt.
+10. Never actuate the solenoid for more than `1s`.
+11. Wait `10s` and repeat.
+
+Open implementation questions:
+- How display-on detection should be made robust against glare, blur, and ambient lighting.
+- How poor-light detection should be measured before deciding to enable the flash LED.
+- How the numeric reading should be extracted from the 7-segment display inside ESPHome / ESP32-CAM.
+
 ## Open Electrical Unknowns (Must Measure)
 - Coil resistance
 - Allowed duty cycle / max on-time

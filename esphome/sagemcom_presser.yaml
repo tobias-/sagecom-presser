@@ -3,6 +3,8 @@ substitutions:
   friendly_name: Sagemcom Presser
   # On AI Thinker ESP32-CAM, GPIO14 is typically free if SD-card is not used.
   solenoid_gate_pin: GPIO14
+  # On AI Thinker ESP32-CAM, the onboard flash LED is typically on GPIO4.
+  flash_led_pin: GPIO4
 
 esphome:
   name: ${name}
@@ -60,6 +62,10 @@ output:
       number: ${solenoid_gate_pin}
       mode: OUTPUT
     inverted: false
+  - platform: ledc
+    id: flash_led_output
+    pin: ${flash_led_pin}
+    channel: 2
 
 switch:
   - platform: template
@@ -67,6 +73,14 @@ switch:
     name: "${friendly_name} Solenoid Armed"
     icon: mdi:shield-lock-outline
     optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+light:
+  - platform: monochromatic
+    id: flash_led
+    name: "${friendly_name} Flash LED"
+    icon: mdi:flashlight
+    output: flash_led_output
     restore_mode: RESTORE_DEFAULT_OFF
 
 number:
@@ -79,7 +93,7 @@ number:
     restore_value: true
     initial_value: 120
     min_value: 40
-    max_value: 500
+    max_value: 1000
     step: 5
     mode: box
   - platform: template
@@ -117,7 +131,9 @@ script:
             - lambda: |-
                 id(solenoid_last_fire_ms) = millis();
             - output.turn_on: solenoid_gate
-            - delay: !lambda "return (uint32_t) id(solenoid_pulse_ms).state;"
+            - delay: !lambda |-
+                const uint32_t requested = (uint32_t) id(solenoid_pulse_ms).state;
+                return requested > 1000 ? 1000 : requested;
             - output.turn_off: solenoid_gate
           else:
             - logger.log:
@@ -141,7 +157,6 @@ binary_sensor:
       const uint32_t cooldown = (uint32_t) id(solenoid_cooldown_ms).state;
       const bool cooled_down = (now - id(solenoid_last_fire_ms)) >= cooldown;
       return id(solenoid_armed).state && cooled_down;
-    update_interval: 250ms
 
 sensor:
   - platform: template
