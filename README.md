@@ -13,6 +13,8 @@ Parametric, non-destructive add-on for a Sagemcom-style water meter:
   - `frame_only`
   - `cradle_only`
   - `solenoid_only`
+  - `camera_holder_only`
+  - `camera_preview`
 
 ## Known Mechanical Reference
 - Meter housing: `58 x 92 mm` (corner radius estimated)
@@ -20,6 +22,23 @@ Parametric, non-destructive add-on for a Sagemcom-style water meter:
 - Button stickout: approximately `2 mm`
 - Solenoid body reference: `30 x 19 x 16 mm`
 - Solenoid plunger: `6 mm` diameter, `12 mm` rest, `17 mm` extended
+- ESP32-CAM board reference: `27.0 x 39.6 mm` (`W x H`)
+- Camera optical center reference on board:
+  - centered in `X`
+  - `9.0 mm` below top edge (`Y`)
+
+## Camera Placement
+- Lens target point is the center of the LCD display reference.
+- Camera distance is computed from FOV to capture full display with minimal extra:
+  - `distance_w = (display_w/2)/tan(fov_h/2)`
+  - `distance_h = (display_h/2)/tan(fov_v/2)`
+  - `distance = max(distance_w, distance_h) + margin`
+- Current defaults:
+  - `camera_fov_h_deg = 62`
+  - `camera_fov_v_deg = 48`
+  - computed optical distance ≈ `36.4 mm`
+- Because lens center is `9 mm` below board top, board center is placed
+  `10.8 mm` below the lens target Y coordinate.
 
 ## Electrical Architecture (Current Plan)
 Power:

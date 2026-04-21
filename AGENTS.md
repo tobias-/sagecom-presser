@@ -23,7 +23,7 @@ Instructions for any coding agent working in this repository.
 - Top-level parameter groups in SCAD:
   - `[Rig]`, `[Meter]`, `[Frame]`, `[SolenoidRef]`, `[Cradle]`, `[RigBridge]`, `[Hidden]`
 - Render selector variable: `rig_part_to_render`
-  - Values: `combined_preview`, `combined_printable`, `frame_only`, `cradle_only`, `solenoid_only`, `meter_preview`, `solenoid_preview`, `collision_check`
+  - Values: `combined_preview`, `combined_printable`, `frame_only`, `cradle_only`, `solenoid_only`, `camera_holder_only`, `camera_preview`, `meter_preview`, `solenoid_preview`, `collision_check`
 
 ## Known Mechanical/Electrical Facts
 - Meter reference:
@@ -38,6 +38,10 @@ Instructions for any coding agent working in this repository.
   - Fit clearance target: `0.20 mm`.
   - Front plate plunger hole oversize: `+2.0 mm`.
   - Front wire notch: `4.0 mm` wide, `2.0 mm` deep.
+- Camera holder:
+  - ESP32-CAM board reference: `27.0 x 39.6 mm`.
+  - Lens center reference: centered in X, `9.0 mm` below top edge.
+  - Placement targets LCD center with computed standoff from FOV parameters.
 - Electrical knowledge currently captured:
   - Solenoid is a 2-wire actuator.
   - Solenoid coil rated supply: `12V`.

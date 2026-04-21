@@ -28,6 +28,8 @@ rig_part_to_render = "combined_preview";
 // "frame_only"
 // "cradle_only"
 // "solenoid_only"
+// "camera_holder_only"
+// "camera_preview"
 // "meter_preview"
 // "solenoid_preview"
 // "collision_check"
@@ -38,6 +40,8 @@ meter_centerlines_show = true;
 cradle_show = true;
 solenoid_ref_show = true;
 solenoid_ref_show_in_preview = true;
+camera_mount_show = true;
+camera_ref_show = true;
 
 $fn = 56;
 
@@ -56,7 +60,7 @@ meter_button_d = 12;
 meter_button_stickout_z = 2;
 
 meter_display_x_from_left = meter_housing_w / 2;
-meter_display_y_from_bottom = 58;
+meter_display_y_from_bottom = 51;
 meter_display_w = 40;
 meter_display_h = 18;
 meter_display_corner_r = 2;
@@ -82,7 +86,7 @@ frame_upright_enable = true;
 frame_upright_w = frame_wall;
 frame_upright_above_display = 8;
 frame_upright_display_clearance = 1.2;
-frame_upright_max_len = 60;
+frame_upright_max_len = 68;
 
 frame_locator_enable = true;
 frame_locator_clearance = 0.7;
@@ -141,6 +145,28 @@ cradle_rear_stop_t = 1.2;
 cradle_rear_stop_gap = 0.2;
 cradle_rear_stop_hole_extra_d = 1.5;
 cradle_rear_stop_keep_fraction_y = 0.5;
+
+/* [Camera] */
+camera_board_w = 27.0;
+camera_board_h = 39.6;
+camera_board_t = 1.6;
+camera_board_clearance = 0.4;
+camera_lens_center_from_top = 9.0;
+camera_lens_body_d = 8.5;
+camera_holder_wall = 2.2;
+camera_holder_depth = 4.0;
+camera_holder_corner_tab = 3.0;
+camera_holder_back_tab_t = 1.0;
+camera_view_margin = 1.0;
+camera_fov_h_deg = 62.0;
+camera_fov_v_deg = 48.0;
+camera_distance_extra = 1.5;
+camera_lens_to_board_z = 0.0;
+camera_arm_count = 2;
+camera_arm_spacing_x = 16.0;
+camera_arm_thickness = 4.0;
+camera_arm_anchor_y_offset = 1.5;
+camera_arm_attach_z_offset = 0.0;
 
 // ---------------------------------------------------------------------------
 // Combined assembly tuning
@@ -212,6 +238,32 @@ cradle_bot_x = cradle_inner_x + 2 * cradle_wall;
 cradle_side_y = max(0.1, cradle_inner_y + cradle_opening_margin - cradle_rail_y_trim);
 cradle_y_min = -cradle_inner_y / 2 - cradle_floor;
 cradle_y_max = -cradle_inner_y / 2 + cradle_side_y;
+
+camera_target_w = meter_display_w + 2 * camera_view_margin;
+camera_target_h = meter_display_h + 2 * camera_view_margin;
+camera_distance_for_w = (camera_target_w / 2) / tan(camera_fov_h_deg / 2);
+camera_distance_for_h = (camera_target_h / 2) / tan(camera_fov_v_deg / 2);
+camera_optical_distance = max(camera_distance_for_w, camera_distance_for_h) + camera_distance_extra;
+camera_lens_offset_y_from_board_center = camera_board_h / 2 - camera_lens_center_from_top;
+camera_target_world = [
+    meter_display_pos[0],
+    meter_display_pos[1],
+    meter_ref_top_z + meter_display_bezel_t + meter_display_active_t
+];
+camera_lens_world = [
+    camera_target_world[0],
+    camera_target_world[1],
+    camera_target_world[2] + camera_optical_distance
+];
+camera_board_center_world = [
+    camera_lens_world[0],
+    camera_lens_world[1] - camera_lens_offset_y_from_board_center,
+    camera_lens_world[2] + camera_lens_to_board_z
+];
+camera_holder_inner_w = camera_board_w + camera_board_clearance;
+camera_holder_inner_h = camera_board_h + camera_board_clearance;
+camera_holder_outer_w = camera_holder_inner_w + 2 * camera_holder_wall;
+camera_holder_outer_h = camera_holder_inner_h + 2 * camera_holder_wall;
 
 // ---------------------------------------------------------------------------
 // Shared helper geometry
@@ -559,6 +611,83 @@ module solenoid_preview() {
 }
 
 // ---------------------------------------------------------------------------
+// Camera modules
+// ---------------------------------------------------------------------------
+
+module esp32_cam_reference() {
+    color([0.10, 0.42, 0.10, 0.65])
+        cube([camera_board_w, camera_board_h, camera_board_t], center = true);
+
+    color([0.08, 0.08, 0.08, 0.90])
+        translate([0, camera_lens_offset_y_from_board_center, camera_board_t / 2 + 1.8])
+            cylinder(h = 3.6, d = camera_lens_body_d, center = true);
+}
+
+module camera_holder() {
+    inner_w = camera_holder_inner_w;
+    inner_h = camera_holder_inner_h;
+    outer_w = camera_holder_outer_w;
+    outer_h = camera_holder_outer_h;
+    tab_xy = min(camera_holder_corner_tab, min(inner_w, inner_h) / 3);
+
+    difference() {
+        cube([outer_w, outer_h, camera_holder_depth], center = true);
+        cube([inner_w, inner_h, camera_holder_depth + 0.4], center = true);
+    }
+
+    // Back corner tabs to keep the board from passing through the holder.
+    for (sx = [-1, 1]) {
+        for (sy = [-1, 1]) {
+            translate([
+                sx * (inner_w / 2 - tab_xy / 2),
+                sy * (inner_h / 2 - tab_xy / 2),
+                -camera_holder_depth / 2 + camera_holder_back_tab_t / 2
+            ])
+                cube([tab_xy, tab_xy, camera_holder_back_tab_t], center = true);
+        }
+    }
+}
+
+module placed_camera_holder() {
+    color([0.18, 0.18, 0.22, 1.0])
+        translate(camera_board_center_world)
+            camera_holder();
+}
+
+module placed_esp32_cam_reference() {
+    translate(camera_board_center_world)
+        esp32_cam_reference();
+}
+
+module camera_mount_struts() {
+    anchor_y = frame_crossbar_top_y - camera_arm_anchor_y_offset;
+    anchor_z = frame_thickness / 2;
+    attach_z = camera_board_center_world[2] - camera_holder_depth / 2 + camera_arm_attach_z_offset;
+    arm_count = max(1, round(camera_arm_count));
+    spacing = (arm_count <= 1) ? 0 : camera_arm_spacing_x / (arm_count - 1);
+    x0 = -camera_arm_spacing_x / 2;
+
+    color([0.20, 0.20, 0.20, 1.0])
+        for (i = [0 : arm_count - 1]) {
+            dx = x0 + i * spacing;
+            hull() {
+                translate([meter_display_pos[0] + dx, anchor_y, anchor_z])
+                    cube([camera_arm_thickness, camera_arm_thickness, camera_arm_thickness], center = true);
+                translate([camera_board_center_world[0] + dx, camera_board_center_world[1], attach_z])
+                    cube([camera_arm_thickness, camera_arm_thickness, camera_arm_thickness], center = true);
+            }
+        }
+}
+
+module camera_preview() {
+    if (camera_mount_show)
+        camera_mount_struts();
+    placed_camera_holder();
+    if (camera_ref_show)
+        placed_esp32_cam_reference();
+}
+
+// ---------------------------------------------------------------------------
 // Combined placement modules
 // ---------------------------------------------------------------------------
 
@@ -631,6 +760,8 @@ module combined_preview() {
             frame_to_cradle_bridge();
     if (solenoid_ref_show)
         placed_solenoid_reference();
+    if (camera_mount_show || camera_ref_show)
+        camera_preview();
 }
 
 module combined_printable() {
@@ -641,6 +772,10 @@ module combined_printable() {
             placed_solenoid_cradle();
         if (frame_show && cradle_show)
             frame_to_cradle_bridge();
+        if (camera_mount_show)
+            camera_mount_struts();
+        if (camera_mount_show)
+            placed_camera_holder();
     }
 }
 
@@ -662,6 +797,11 @@ if (rig_part_to_render == "combined_preview") {
 } else if (rig_part_to_render == "solenoid_only") {
     if (solenoid_ref_show)
         placed_solenoid_reference();
+} else if (rig_part_to_render == "camera_holder_only") {
+    camera_holder();
+} else if (rig_part_to_render == "camera_preview") {
+    meter_scene();
+    camera_preview();
 } else if (rig_part_to_render == "meter_preview") {
     meter_preview();
 } else if (rig_part_to_render == "solenoid_preview") {
