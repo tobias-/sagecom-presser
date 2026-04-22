@@ -23,9 +23,13 @@ Parametric, non-destructive add-on for a Sagemcom-style water meter:
 - Solenoid body reference: `30 x 19 x 16 mm`
 - Solenoid plunger: `6 mm` diameter, `12 mm` rest, `17 mm` extended
 - ESP32-CAM board reference: `27.0 x 39.6 mm` (`W x H`)
-- Camera optical center reference on board:
-  - centered in `X`
-  - `9.0 mm` below top edge (`Y`)
+- ESP32-CAM board thickness reference: `1.6 mm`
+- Camera/lens body diameter reference used for clearance: `8.5 mm`
+- Camera optical center reference on board (coordinate form):
+  - board origin at top-left, `+X` right, `+Y` down
+  - lens center: `(x=13.5 mm, y=9.0 mm)`
+  - equivalent from edges: centered in X, `9.0 mm` from top, `30.6 mm` from bottom
+  - equivalent from board center: `10.8 mm` toward top (and centered in X)
 
 ## Camera Placement
 - Lens target point is the center of the LCD display reference.

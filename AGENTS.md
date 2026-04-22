@@ -40,7 +40,9 @@ Instructions for any coding agent working in this repository.
   - Front wire notch: `4.0 mm` wide, `2.0 mm` deep.
 - Camera holder:
   - ESP32-CAM board reference: `27.0 x 39.6 mm`.
-  - Lens center reference: centered in X, `9.0 mm` below top edge.
+  - Lens center reference:
+    - top-left coordinates: `(x=13.5 mm, y=9.0 mm)` with `+Y` downward on board.
+    - from board center: `10.8 mm` toward board top, centered in X.
   - Placement targets LCD center with computed standoff from FOV parameters.
 - Electrical knowledge currently captured:
   - Solenoid is a 2-wire actuator.
